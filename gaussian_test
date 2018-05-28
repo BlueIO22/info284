@@ -1,0 +1,52 @@
+import numpy as np
+import codecs
+import pandas as pd
+
+import ssl
+
+import urllib.request
+
+import sklearn
+from sklearn.naive_bayes import GaussianNB
+
+from sklearn import metrics
+from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
+from sklearn.decomposition import PCA
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+from sklearn.datasets.samples_generator import make_blobs
+import seaborn as sns
+
+# import plot.ply graphs for visual applicance
+
+df = pd.read_csv('dataset.txt', delim_whitespace=True)
+
+x = df.iloc[:, 0:8]
+y = df.iloc[:, -1]
+print(x)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=.33, random_state=17)
+
+clf = GaussianMixture(n_components=5)
+clf.fit(df)
+
+y_predict = clf.predict(x_test)
+
+print(accuracy_score(y_test, y_predict))
+plt.hist2d(df, 80, normed=True, alpha=0.3)
+plt.plot()
+plt.show()
+
+# K-Nearest means
+df_tr = df
+
+kmeans = KMeans(n_clusters=5).fit(df)
+labels = kmeans.labels_
+
+kmeans.fit(df)
+
+y_predict = kmeans.predict(x_test)
+
+print(accuracy_score(y_test, y_predict))
+
