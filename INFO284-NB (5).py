@@ -1,9 +1,4 @@
 
-# coding: utf-8
-
-# In[2]:
-
-
 from glob import glob
 from collections import Counter
 import re
@@ -19,63 +14,35 @@ globalLearningGuess = bool()
 globLearningPos = Counter()
 globLearningNeg = Counter()
 
-
-# In[3]:
-
-
 def LearningStateReal(poNe):
     global globalLearningReal
     globalLearningReal = poNe
     return globalLearningReal
-
-
-# In[4]:
-
 
 def LearningStateGuess(poNe):
     global globalLearningGuess
     globalLearningGuess = poNe
     return globalLearningGuess
 
-
-# In[5]:
-
-
 def nrCorrect(newCorrect):
     global globalNrCorrects
     globalNrCorrects += newCorrect
     return globalNrCorrects
-
-
-# In[6]:
-
 
 def nrFiles(newFiles):
     global globalNrFiles 
     globalNrFiles = globalNrFiles + newFiles
     return globalNrFiles
 
-
-# In[7]:
-
-
 def globalMemoryPos(lc):
     global globLearningPos
     globLearning = lc
     return globLearningPos
 
-
-# In[8]:
-
-
 def globalMemoryNeg(lc):
     global globLearningNeg
     globLearning = lc
     return globLearningNeg
-
-
-# In[9]:
-
 
 def commonWordRemover(c):
     
@@ -83,10 +50,6 @@ def commonWordRemover(c):
         if c[key] >= len(c) * 0.05:
             c[key] = 0
     return c
-
-
-# In[10]:
-
 
 def rareWordFinder(c):
         
@@ -99,10 +62,6 @@ def rareWordFinder(c):
         
     return rareWords
 
-
-# In[11]:
-
-
 def singleFileWordCounter(Path):
     counter = Counter()
     file = open(random.choice(Path))
@@ -113,14 +72,9 @@ def singleFileWordCounter(Path):
     counter = commonWordRemover(counter)
     return counter
 
-
-# In[12]:
-
-
 def test(posTest, negTest):
     
     r = random.randint(1, 2)
-    #r = 1
     if r == 2:
         file = posTest
         print('Filen er positiv')
@@ -131,13 +85,7 @@ def test(posTest, negTest):
         print('Filen er negativ')
         LearningStateReal(False)
     print(file)
-    #print(test_counter)
-    #print(sum(test_counter.values()))
     return file
-
-
-# In[13]:
-
 
 def wordCounterTrain(filePath):
 
@@ -148,7 +96,6 @@ def wordCounterTrain(filePath):
         counter[word] = 1
     f.close()
 
-    #counter = commonWordRemover(counter)
     return(counter)
 
 def wordCounterTest(filePath):
@@ -159,11 +106,7 @@ def wordCounterTest(filePath):
         counter[word] += 1
     f.close()
 
-    #counter = commonWordRemover(counter)
     return (counter)
-
-# In[14]:
-
 
 def fileFinder(dirPath):
     i = 0
@@ -174,9 +117,6 @@ def fileFinder(dirPath):
             files.append(os.path.join(dirPath + '/' + file))
 
     return files
-
-
-# In[34]:
 
 def interpetFileCopy(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, testing, trainingFull, posFileCount, negFileCount):
     pos = 1.0
@@ -194,10 +134,8 @@ def interpetFileCopy(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, test
         neg = neg * wordProbNeg
         c = ((trainingFull[key] + 1) / nrFiles)
 
-    print(posFileCount)
     pos = (pos * posFileCount) / c
     neg = (neg * negFileCount) / c
-    print("POS: " + str(pos) + " NEG: " + str(neg))
 
     if (pos - neg) > 0.5 :
         LearningStateGuess(True)
@@ -205,29 +143,18 @@ def interpetFileCopy(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, test
     elif (pos - neg) < 0.5:
         LearningStateGuess(False)
 
-
-
 def interpetFile(nrFiles, trainingPos, trainingNeg, testing):
     pos = 1
     neg = 1
     for key in testing.keys():
         wordProbPos = float(trainingPos[key] + 1) / len(trainingPos.values())
         pos = pos * wordProbPos
-        #print("Pos: " + str(trainingPos[key] + 1) + "\/" + str(len(trainingPos.values())))
         wordProbNeg = float(trainingNeg[key] + 1) / len(trainingNeg.values())
         neg = pos * wordProbNeg
-        #print("Neg: " + str(trainingNeg[key] + 1) + "\/" + str(len(trainingNeg.values())))
 
-        
-    #posAndNeg = sum(trainingPos.values()) + sum(trainingNeg.values())
     file = (nrFiles / 2) / nrFiles
-    #print(pos)
-    #print(str((pos*file) / neg))
-    #print(str((neg * pos) / pos))
-    #print("pos: " +  str(pos) + "Slash, times" + str(file) + "slash" + str(pos) +  "slash" + str(nrFiles))
 
     pos = (pos * file) / (pos / nrFiles)
-    #print("neg: " + str(neg) + "Slash, times" + str(file) + "slash" + str(neg) +  "slash" + str(nrFiles))
 
     neg = (neg * file) / (neg / nrFiles)
 
@@ -237,28 +164,6 @@ def interpetFile(nrFiles, trainingPos, trainingNeg, testing):
             
     elif pos < neg:
         LearningStateGuess(False)
-        
-        #if testSum != 0:
-        #prob = round(testSum / len(testing.values()), 5)
-        #if prob != 0:
-        #    if prob >= 0.5:
-                #print('I guess that it is Positive')
-                
-        
-        #    elif prob < 0.5:
-                #print('I guess that it is Negative')
-        #        LearningStateGuess(False)
-            
-        #    else:
-                #print('I guess that it is Negative')
-        #        LearningStateGuess(False)
-        
-    #else:
-    #    print('I guess that it is Negative')
-    #    LearningStateGuess(False)
-
-
-# In[16]:
 
 
 def train(train_counter, directory):
@@ -289,20 +194,15 @@ def learn(learningPos, learningNeg):
     i = 0
 
     while i < len(allTrainingFiles):
-        #training = train()
 
-        #LearningStateReal(True)
         if i < len(posFiles):
             learningPos.update(wordCounterTest(posFiles[i]))
 
-        #LearningStateReal(False)
         if i < len(negFiles):
             learningNeg.update(wordCounterTest(negFiles[i]))
 
         i = i + 1
 
-        #nrWords = len(learningPos) + len(learningNeg)
-        #print(nrWords)
 
     i = 0
     trainingFull.update(learningNeg)
@@ -321,34 +221,14 @@ def learn(learningPos, learningNeg):
         if globalLearningReal == globalLearningGuess:
             nrCorrect(1)
 
-            # if globalLearningReal == True:
-        #    nrPos += 1
-        # else:
-        #    nrNeg+=1
-
-        # nrTotal += 1
         print(str(nrCorrect(0)) + ' of ' + str(nrFiles(0)) + ' is correct')
-
-    #print(str(nrCorrect(0)) + ' of ' + str(nrFiles(0)) + ' is correct')
-    #return learningPos & learningNeg
-
-
-# In[18]:
-
 
 def textEvaluater(text):
     words = Counter(text.lower().split())
     return words
 
-
-# In[36]:
-
-
 learn(Counter(), Counter())
 print('-Done-')
-
-
-# In[ ]:
 
 
 
