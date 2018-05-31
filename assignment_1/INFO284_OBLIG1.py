@@ -34,59 +34,6 @@ def nrFiles(newFiles):
     globalNrFiles = globalNrFiles + newFiles
     return globalNrFiles
 
-def globalMemoryPos(lc):
-    global globLearningPos
-    globLearning = lc
-    return globLearningPos
-
-def globalMemoryNeg(lc):
-    global globLearningNeg
-    globLearning = lc
-    return globLearningNeg
-
-def commonWordRemover(c):
-    
-    for key in c.keys():
-        if c[key] >= len(c) * 0.05:
-            c[key] = 0
-    return c
-
-def rareWordFinder(c):
-        
-    rareWords = Counter()
-    rareWords = c
-        
-    for key, count in dropwhile(lambda key_count: key_count[1] <= 300, c.most_common()): del c[key]
-        
-    rareWords = rareWords - c
-        
-    return rareWords
-
-def singleFileWordCounter(Path):
-    counter = Counter()
-    file = open(random.choice(Path))
-    for x in range (0,1):
-        for word in file.read().lower().split():
-            counter[word] = 1
-    file.close()
-    counter = commonWordRemover(counter)
-    return counter
-
-def test(posTest, negTest):
-    
-    r = random.randint(1, 2)
-    if r == 2:
-        file = posTest
-        print('Filen er positiv')
-        LearningStateReal(True)
-        
-    else:
-        file = negTest               
-        print('Filen er negativ')
-        LearningStateReal(False)
-    print(file)
-    return file
-
 def wordCounterTrain(filePath):
 
     counter = Counter()
@@ -118,7 +65,7 @@ def fileFinder(dirPath):
 
     return files
 
-def interpetFileCopy(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, testing, trainingFull, posFileCount, negFileCount):
+def interpetFile(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, testing, trainingFull, posFileCount, negFileCount):
     pos = 1.0
     neg = 1.0
     c = 1.0
@@ -143,32 +90,9 @@ def interpetFileCopy(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, test
     elif (pos - neg) < 0.5:
         LearningStateGuess(False)
 
-def interpetFile(nrFiles, trainingPos, trainingNeg, testing):
-    pos = 1
-    neg = 1
-    for key in testing.keys():
-        wordProbPos = float(trainingPos[key] + 1) / len(trainingPos.values())
-        pos = pos * wordProbPos
-        wordProbNeg = float(trainingNeg[key] + 1) / len(trainingNeg.values())
-        neg = pos * wordProbNeg
-
-    file = (nrFiles / 2) / nrFiles
-
-    pos = (pos * file) / (pos / nrFiles)
-
-    neg = (neg * file) / (neg / nrFiles)
-
-
-    if pos >= neg:
-        LearningStateGuess(True)
-            
-    elif pos < neg:
-        LearningStateGuess(False)
-
-
 def train(train_counter, directory):
     for file in directory:
-        train_counter = interpetFileCopy(train_counter, wordCounterTrain(file))
+        train_counter = interpetFile(train_counter, wordCounterTrain(file))
         directory.remove(file)
     return train_counter
 
@@ -216,7 +140,7 @@ def learn(learningPos, learningNeg):
 
         nrFiles(1)
 
-        interpetFileCopy(len(allTrainingFiles), len(posFiles), len(negFiles), learningPos, learningNeg, wordCounterTest(testFile), trainingFull, pos_ct, neg_ct)
+        interpetFile(len(allTrainingFiles), len(posFiles), len(negFiles), learningPos, learningNeg, wordCounterTest(testFile), trainingFull, pos_ct, neg_ct)
 
         if globalLearningReal == globalLearningGuess:
             nrCorrect(1)
