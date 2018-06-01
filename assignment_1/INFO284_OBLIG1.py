@@ -1,18 +1,11 @@
 
-from glob import glob
 from collections import Counter
-import re
 import os
-import time
-from itertools import dropwhile
-import random
 
 globalNrCorrects = 0
 globalNrFiles = 0
 globalLearningReal = bool()
 globalLearningGuess = bool()
-globLearningPos = Counter()
-globLearningNeg = Counter()
 
 def LearningStateReal(poNe):
     global globalLearningReal
@@ -34,18 +27,11 @@ def nrFiles(newFiles):
     globalNrFiles = globalNrFiles + newFiles
     return globalNrFiles
 
-def wordCounterTrain(filePath):
-
-    counter = Counter()
-    f = open(filePath)
-    c = 0
-    for word in f.read().lower().split():
-        counter[word] = 1
-    f.close()
-
-    return(counter)
-
-def wordCounterTest(filePath):
+'''
+Counts occourances of unique words in a file
+@param filePath: Path to file
+'''
+def wordCounter(filePath):
     counter = Counter()
     f = open(filePath)
     c = 0
@@ -55,6 +41,10 @@ def wordCounterTest(filePath):
 
     return (counter)
 
+'''
+iterates through a directory and finds the path of all files with .txt extension.
+@param dirPath: Path of directory to files
+'''
 def fileFinder(dirPath):
     i = 0
     files = []
@@ -65,14 +55,22 @@ def fileFinder(dirPath):
 
     return files
 
-def interpetFile(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, testing, trainingFull, posFileCount, negFileCount):
+'''
+Interprets file, and using naive bayes predicts weather the file is positive or negative
+@param nrFiles: Number of files
+@param trainingPos: Counter of positive words
+@param trainingNeg: Counter of negative words
+@param testing: Counter of occouranses of each unique word in file
+@param trainingFull: Counter of total accourances of all words
+@param posFileCount: Count of positive files
+@param negFileCount: Count of negative files
+'''
+def interpetFile(nrFiles, trainingPos, trainingNeg, testing, trainingFull, posFileCount, negFileCount):
     pos = 1.0
     neg = 1.0
     c = 1.0
 
     nrFiles = float(nrFiles)
-    negFiles = float(negFiles)
-    posFiles = float(posFiles)
 
     for key in testing.keys():
         wordProbPos = ((trainingPos[key] + 1) / posFileCount) / 1000
@@ -90,40 +88,33 @@ def interpetFile(nrFiles, posFiles, negFiles, trainingPos, trainingNeg, testing,
     elif (pos - neg) < 0.5:
         LearningStateGuess(False)
 
-def train(train_counter, directory):
-    for file in directory:
-        train_counter = interpetFile(train_counter, wordCounterTrain(file))
-        directory.remove(file)
-    return train_counter
-
-def learn(learningPos, learningNeg):
-    li = float()
-    trainFiles = []
-    testFiles = []
+'''
+Learning and testing the algorithm with data from a dataset
+'''
+def learn():
+    learningPos = Counter()
+    learningNeg = Counter()
     nrCorrect(-globalNrCorrects)
     nrFiles(-globalNrFiles)
-    nrPos = 1
-    nrNeg = 1
-    nrTotal = 2
-    posFiles = fileFinder("/Users/mariussorenes/PycharmProjects/train/pos")
-    negFiles = fileFinder("/Users/mariussorenes/PycharmProjects/train/neg")
-    negTestFiles = fileFinder('/Users/mariussorenes/PycharmProjects/test/neg')  # fileFinder(str(input('Please write the path of the directory for negative test files: ')), li)
-    posTestFiles = fileFinder('/Users/mariussorenes/PycharmProjects/test/pos')  # fileFinder(str(input('Please write the path of the directory for positive test files: ')), li)
+    posFiles = fileFinder(str(input('Please write the path of the directory for positive training files: ')))
+    negFiles = fileFinder(str(input('Please write the path of the directory for negative training files: ')))
+    posTestFiles = fileFinder(str(input('Please write the path of the directory for positive test files: ')))
+    negTestFiles = fileFinder(str(input('Please write the path of the directory for negative test files: ')))
     allTrainingFiles = list(set().union(posFiles, negFiles))
     allTestFiles = list(set().union(posTestFiles, negTestFiles))
 
     trainingFull = Counter()
 
-
+    print('Training algorithm..')
     i = 0
 
     while i < len(allTrainingFiles):
 
         if i < len(posFiles):
-            learningPos.update(wordCounterTest(posFiles[i]))
+            learningPos.update(wordCounter(posFiles[i]))
 
         if i < len(negFiles):
-            learningNeg.update(wordCounterTest(negFiles[i]))
+            learningNeg.update(wordCounter(negFiles[i]))
 
         i = i + 1
 
@@ -135,23 +126,21 @@ def learn(learningPos, learningNeg):
     pos_ct = float(len(posFiles)) / len(allTrainingFiles)
     neg_ct = float(len(negFiles)) / len(allTrainingFiles)
 
+    print('Testing algorithm..')
     for file in allTestFiles:
         testFile = file
 
         nrFiles(1)
 
-        interpetFile(len(allTrainingFiles), len(posFiles), len(negFiles), learningPos, learningNeg, wordCounterTest(testFile), trainingFull, pos_ct, neg_ct)
+        interpetFile(len(allTrainingFiles), learningPos, learningNeg, wordCounter(testFile), trainingFull, pos_ct, neg_ct)
 
         if globalLearningReal == globalLearningGuess:
             nrCorrect(1)
 
-        print(str(nrCorrect(0)) + ' of ' + str(nrFiles(0)) + ' is correct')
+    print(str(nrCorrect(0)) + ' of ' + str(nrFiles(0)) + ' is correct')
 
-def textEvaluater(text):
-    words = Counter(text.lower().split())
-    return words
-
-learn(Counter(), Counter())
+# starting the training and testing
+learn()
 print('-Done-')
 
 
